@@ -14,7 +14,7 @@ Ts=delta+Tu; %total OFDM symbol period
 Kmax=1705; %number of subcarriers
 Kmin=0;
 FS=4096; %IFFT/FFT length
-q=10; %carrier period to elementary period ratio
+q=4; %carrier period to elementary period ratio
 fc=q*1/T; %carrier frequency
 Rs=4*fc; %simulation period
 t=0:1/Rs:Tu;
@@ -67,31 +67,31 @@ subplot(212);
 pwelch(u,[],[],[],Rs);
 [b,a] = butter(13,1/20); %reconstruction filter
 [H,F] = FREQZ(b,a,FS,Rs);
-figure(6);
-plot(F,20*log10(abs(H)));
+%figure(6);
+%plot(F,20*log10(abs(H)));
 uoft = filter(b,a,u); %baseband signal (D)
-figure(7);
-subplot(211);
-plot(t(80:480),real(uoft(80:480)));
-subplot(212);
-plot(t(80:480),imag(uoft(80:480)));
-figure(8);
-subplot(211);
-plot(ff,abs(fft(uoft,q*FS))/FS);
-subplot(212);
-pwelch(uoft,[],[],[],Rs);
+%figure(7);
+%subplot(211);
+%plot(t(80:480),real(uoft(80:480)));
+%subplot(212);
+%plot(t(80:480),imag(uoft(80:480)));
+%figure(8);
+%subplot(211);
+%plot(ff,abs(fft(uoft,q*FS))/FS);
+%subplot(212);
+%pwelch(uoft,[],[],[],Rs);
 %Upconverter
 s_tilde=(uoft.').*exp(1i*2*pi*fc*t);
 s=real(s_tilde); %passband signal (E)
-figure(9);
-plot(t(80:480),s(80:480));
-figure(10);
-subplot(211);
-13
+%figure(9);
+%plot(t(80:480),s(80:480));
+%figure(10);
+%subplot(211);
 %plot(ff,abs(fft(((real(uoft).').*cos(2*pi*fc*t)),q*FS))/FS);
 %plot(ff,abs(fft(((imag(uoft).').*sin(2*pi*fc*t)),q*FS))/FS);
-plot(ff,abs(fft(s,q*FS))/FS);
-subplot(212);
+%plot(ff,abs(fft(s,q*FS))/FS);
+%subplot(212);
 %pwelch(((real(uoft).').*cos(2*pi*fc*t)),[],[],[],Rs);
 %pwelch(((imag(uoft).').*sin(2*pi*fc*t)),[],[],[],Rs);
-pwelch(s,[],[],[],Rs);
+%pwelch(s,[],[],[],Rs);
+dlmwrite('wynik.txt', s);
