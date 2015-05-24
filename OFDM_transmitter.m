@@ -21,12 +21,16 @@ t=0:1/Rs:Tu;
 %Data generator (A)
 M=Kmax+1;
 rand('state',0);
-a=-1+2*round(rand(M,1)).'+i*(-1+2*round(rand(M,1))).';
-A=length(a);
-info=zeros(FS,1);
-info(1:(A/2)) = [ a(1:(A/2)).']; %Zero padding
-info((FS-((A/2)-1)):FS) = [ a(((A/2)+1):A).'];
+%a=-1+2*round(rand(M,1));
+%A=length(a);
+%info=zeros(FS,1);
+%info(1:(A/2)) = [ a(1:(A/2)).']; %Zero padding
+%info((FS-((A/2)-1)):FS) = [ a(((A/2)+1):A).'];
 %Subcarriers generation (B)
+
+A = importdata('test.txt');
+a = length(A); 
+info = reshape(A, a, 1);
 carriers=FS.*ifft(info,FS);
 tt=0:T/2:Tu;
 figure(1);
