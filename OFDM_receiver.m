@@ -37,7 +37,6 @@ u=[dummy; zeros(46,1)];
 uoft = filter(b,aa,u);
 delay=64; %Reconstruction filter delay
 s_tilde=(uoft(delay+(1:length(t))).').*exp(1i*2*pi*fc*t);
-14
 s=real(s_tilde);
 %OFDM RECEPTION
 %Downconversion
@@ -88,7 +87,6 @@ subplot(211);
 stem(tt(1:20),(real(r_data(1:20))));
 axis([0 12e-7 -60 60]);
 grid on;
-15
 figure(5);
 subplot(212);
 stem(tt(1:20),(imag(r_data(1:20))));
