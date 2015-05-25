@@ -9,24 +9,23 @@ Ts=delta+Tu; %total OFDM symbol period
 Kmax=1705; %number of subcarriers
 Kmin=0;
 FS=4096; %IFFT/FFT length
-q=10; %carrier period to elementary period ratio
+q=4; %carrier period to elementary period ratio
 fc=q*1/T; %carrier frequency
 Rs=4*fc; %simulation period
 t=0:1/Rs:Tu;
 tt=0:T/2:Tu;
 %Data generator
-sM = 2;
-[x,y] = meshgrid((-sM+1):2:(sM-1),(-sM+1):2:(sM-1));
-alphabet = x(:) + 1i*y(:);
-N=Kmax+1;
-rand('state',0);
+%sM = 2;
+%[x,y] = meshgrid((-sM+1):2:(sM-1),(-sM+1):2:(sM-1));
+%alphabet = x(:) + 1i*y(:);
+%N=Kmax+1;
+%rand('state',0);
 a = importdata('recive.txt');
 A = length(a); 
 %a=-1+2*round(rand(N,1)).'+i*(-1+2*round(rand(N,1))).';
 %A=length(a);
-info=zeros(FS,1);
-info(1:(A/2)) = [ a(1:(A/2)).'];
-info((FS-((A/2)-1)):FS) = [ a(((A/2)+1):A).'];
+info = reshape(a, A, 1);
+
 carriers=FS.*ifft(info,FS);
 %Upconverter
 L = length(carriers);
