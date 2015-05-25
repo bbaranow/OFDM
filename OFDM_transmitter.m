@@ -94,4 +94,4 @@ s=real(s_tilde); %passband signal (E)
 %pwelch(((real(uoft).').*cos(2*pi*fc*t)),[],[],[],Rs);
 %pwelch(((imag(uoft).').*sin(2*pi*fc*t)),[],[],[],Rs);
 %pwelch(s,[],[],[],Rs);
-dlmwrite('wynik.txt', s);
+dlmwrite('wynik1.txt', s_tilde);

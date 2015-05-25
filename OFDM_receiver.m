@@ -22,11 +22,15 @@ N=Kmax+1;
 rand('state',0);
 a = importdata('recive.txt');
 A = length(a); 
+info = reshape(a, A, 1);
+%A = length(a); 
 %a=-1+2*round(rand(N,1)).'+i*(-1+2*round(rand(N,1))).';
 %A=length(a);
-info=zeros(FS,1);
-info(1:(A/2)) = [ a(1:(A/2)).'];
-info((FS-((A/2)-1)):FS) = [ a(((A/2)+1):A).'];
+%dlmwrite('aa.txt', a);
+%dlmwrite('A.txt', A);
+%info=zeros(FS,1);
+%info(1:(A/2)) = [ a(1:(A/2)).'];
+%info((FS-((A/2)-1)):FS) = [ a(((A/2)+1):A).'];
 carriers=FS.*ifft(info,FS);
 %Upconverter
 L = length(carriers);
