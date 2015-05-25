@@ -66,7 +66,7 @@ plot(ff,abs(fft(u,q*FS))/FS);
 subplot(212);
 pwelch(u,[],[],[],Rs);
 [b,a] = butter(13,1/20); %reconstruction filter
-[H,F] = FREQZ(b,a,FS,Rs);
+[H,F] = freqz(b,a,FS,Rs);
 %figure(6);
 %plot(F,20*log10(abs(H)));
 uoft = filter(b,a,u); %baseband signal (D)
