@@ -1,0 +1,4 @@
+n=4; %liczba podnosnych
+
+a = importdata('data.txt');
+

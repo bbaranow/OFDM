@@ -23,14 +23,16 @@ M=Kmax+1;
 rand('state',0);
 %a=-1+2*round(rand(M,1));
 %A=length(a);
-%info=zeros(FS,1);
-%info(1:(A/2)) = [ a(1:(A/2)).']; %Zero padding
-%info((FS-((A/2)-1)):FS) = [ a(((A/2)+1):A).'];
-%Subcarriers generation (B)
-
 A = importdata('test.txt');
 a = length(A); 
-info = reshape(A, a, 1);
+info1 = reshape(A, a, 1);
+A = length(info1);
+info=zeros(FS,1);
+info(1:(A/2)) = [ info1(1:(A/2)).']; %Zero padding
+info((FS-((A/2)-1)):FS) = [ info1(((A/2)+1):A).'];
+%Subcarriers generation (B)
+
+
 carriers=FS.*ifft(info,FS);
 tt=0:T/2:Tu;
 figure(1);
@@ -94,4 +96,4 @@ s=real(s_tilde); %passband signal (E)
 %pwelch(((real(uoft).').*cos(2*pi*fc*t)),[],[],[],Rs);
 %pwelch(((imag(uoft).').*sin(2*pi*fc*t)),[],[],[],Rs);
 %pwelch(s,[],[],[],Rs);
-dlmwrite('wynik1.txt', s_tilde);
+dlmwrite('wynik1.txt', s);

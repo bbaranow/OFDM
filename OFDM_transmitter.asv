@@ -1,0 +1,139 @@
+Rx_Data_matrix = reshape(Rx_Data, IFFT_bin_length, symbols_per_carrier + 1);
+%
+% Transform each symbol from time to frequency domain
+%   - take the fft of each column
+%
+Rx_spectrum = fft(Rx_Data_matrix);%
+% PLOT BASIC FREQUENCY DOMAIN REPRESENTATION
+%
+%--------1---------2---------3---------4---------5---------6---------7---------8
+%
+%figure (7)
+%stem(0:IFFT_bin_length-1, abs(Rx_spectrum(1:IFFT_bin_length,2)),'b*-')
+%grid on
+%axis ([0 IFFT_bin_length -0.5 1.5])
+%ylabel('Magnitude')
+%xlabel('FFT Bin')
+%title('OFDM Receive Spectrum, Magnitude')
+%figure (8)
+%plot(0:IFFT_bin_length-1, (180/pi)*angle(Rx_spectrum(1:IFFT_bin_length,2)), 'go')
+%hold on
+%stem(carriers-1, (180/pi)*angle(Rx_spectrum(carriers,2)),'b*-')
+%stem(conjugate_carriers-1, (180/pi)*angle(Rx_spectrum(conjugate_carriers,2)),'b*-')
+%axis ([0 IFFT_bin_length -200 +200])
+%grid on
+%ylabel('Phase (degrees)')
+%xlabel('FFT Bin')
+%title('OFDM Receive Spectrum,  Phase')
+%
+% END OF PLOTTING
+
+
+%--------1---------2---------3---------4---------5---------6---------7---------8
+%
+% Extract the carrier FFT bins
+%   - only keep the fft bins that are used as carriers
+%   - take the transpose of the result so that each column will represent 
+%     a carrier
+%      - this is in preparation for using the diff( ) function later to decode 
+%        differential encoding
+%      - format following this operation is:
+%
+%               C1-s1  C2-s1  C3-s1 ...
+%               C1-s2  C2-s2  C3-s2 ...
+%               C1-s3  C2-s3  C3-s3 ...
+%                   .      .      .
+%                   .      .      .
+%         
+%   - IMPORTANT MATLAB NOTE CONCERNING TRANSPOSING AND CONJUGATION
+%     - it appears that each time a matrix is transposed, the conjugate of 
+%       each value is taken
+%     - if an even number of transposes are done, then it is transparent
+%     - obviously, this does not affect real numbers
+%
+Rx_carriers = Rx_spectrum(carriers,:)';
+%
+%--------1---------2---------3---------4---------5---------6---------7---------8
+%
+% PLOT EACH RECEIVED SYMBOL
+%
+figure (9)
+Rx_phase_P = angle(Rx_carriers);
+Rx_mag_P = abs(Rx_carriers);
+polar(Rx_phase_P, Rx_mag_P,'bd');
+%
+% END PLOT
+%
+% Find the phase (angle) of each FFT bin (each carrier)
+%   - convert from radians to degrees
+%   - normalize phase to be between 0 and 359 degrees
+%
+Rx_phase = angle(Rx_carriers)*(180/pi);
+phase_negative = find(Rx_phase < 0);
+Rx_phase(phase_negative) = rem(Rx_phase(phase_negative)+360,360);
+%
+% Extract phase differences (from the differential encoding)
+%   - the matlab diff( ) function is perfect for this operation
+%   - again, normalize the result to be between 0 and 359 degrees
+%
+Rx_decoded_phase = diff(Rx_phase);
+phase_negative = find(Rx_decoded_phase < 0);
+Rx_decoded_phase(phase_negative) = rem(Rx_decoded_phase(phase_negative)+360,360);
+%
+%--------1---------2---------3---------4---------5---------6---------7---------8
+%
+% Convert phase to symbol
+%   - calculate the base phase which is the phase difference between each 
+%     consecutive symbol
+%   - for example, if there are 2 bits per symbol, base phase is 90 and the 
+%     symbols are represented by 0, 90, 180, and 270 degrees
+%   - calculate the maximum deviation from the base phase that will still be 
+%     decoded as base phase
+%   - for example, if base phase is 90, then delta phase is 45, and anything 
+%     within 45 degrees of base phase is accepted as base phase
+%      - continuing the above example, a symbol represented by 180 will be 
+%        decoded as 180 as long as it is within the range 180+45 and 180-45
+%   - generate a symbol matrix where the results of the phase decode 
+%     will be placed
+%      - note that since the matrix is created as a zero matrix, then the zero
+%        values do not have to be decoded
+%      - zero is therefore the default value after decoding, if a value is not 
+%        decoded as anything else, then it is zero
+%      - this actually save alot of trouble since the zero phase spans the 
+%        lowest and highest phase values and therefore requires special 
+%        processing
+%      - it is also efficient in that it eliminates a pass through the loop
+%
+base_phase = 360/2^bits_per_symbol;
+delta_phase = base_phase/2;
+Rx_decoded_symbols = zeros(size(Rx_decoded_phase,1),size(Rx_decoded_phase,2));
+%
+for i = 1:(2^bits_per_symbol - 1)  
+    center_phase = base_phase*i;
+    plus_delta = center_phase+delta_phase;
+    minus_delta = center_phase-delta_phase;
+    decoded = find((Rx_decoded_phase <= plus_delta) & (Rx_decoded_phase > minus_delta));
+    Rx_decoded_symbols(decoded)=i;
+end
+%
+% Convert the matrix into a serial symbol stream
+%
+Rx_serial_symbols = reshape(Rx_decoded_symbols',1,size(Rx_decoded_symbols,1)*size(Rx_decoded_symbols,2));
+%
+% Convert the symbols to binary
+%
+for i = bits_per_symbol: -1: 1
+    if i ~= 1
+        Rx_binary_matrix(i,:) = rem(Rx_serial_symbols,2);
+        Rx_serial_symbols = floor(Rx_serial_symbols/2);
+    else
+        Rx_binary_matrix(i,:) = Rx_serial_symbols;
+    end
+end
+baseband_in = reshape(Rx_binary_matrix,1,size(Rx_binary_matrix,1)*size(Rx_binary_matrix,2));
+%
+% Find bit errors
+%
+bit_errors = find(baseband_in ~= baseband_out);
+bit_error_count = size(bit_errors,2);
+%--------1---------2---------3---------4---------5---------6---------7---------8
